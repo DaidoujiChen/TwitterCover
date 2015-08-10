@@ -127,6 +127,10 @@
 }
 
 - (void)addTwitterCoverWithImage:(UIImage *)image withImageSize:(CGSize)imageSize withTopView:(UIView *)topView {
+    if (self.twitterCoverView) {
+        [self.twitterCoverView removeFromSuperview];
+        [self removeObserver:self forKeyPath:@"contentOffset"];
+    }
     CHTwitterCoverView *view = [[CHTwitterCoverView alloc] initWithFrame:CGRectMake(0, 0, imageSize.width, imageSize.height) andContentTopView:topView];
     view.backgroundColor = [UIColor clearColor];
     view.image = image;
