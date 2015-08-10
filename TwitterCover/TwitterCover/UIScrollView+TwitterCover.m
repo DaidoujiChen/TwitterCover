@@ -67,8 +67,8 @@
 - (void)layoutSubviews {
     [super layoutSubviews];
     
-    if (self.scrollView.contentOffset.y < 0) {
-        CGFloat offset = -self.scrollView.contentOffset.y;
+    if (self.scrollView.contentOffset.y < -self.scrollView.contentInset.top) {
+        CGFloat offset = -self.scrollView.contentOffset.y - self.scrollView.contentInset.top;
         self.topView.frame = CGRectMake(0, -offset, self.imageWidth, self.topView.bounds.size.height);
         self.frame = CGRectMake(-offset, -offset + self.topView.bounds.size.height, self.imageWidth + offset * 2, self.imageHeight + offset);
     }
