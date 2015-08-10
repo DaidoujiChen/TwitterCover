@@ -26,6 +26,8 @@
 #import "CHTwitterCoverDemoScrollViewController.h"
 #import "UIScrollView+TwitterCover.h"
 
+#define imageSize CGSizeMake(CGRectGetWidth([UIScreen mainScreen].bounds), 200)
+
 @interface CHTwitterCoverDemoScrollViewController ()
 
 @end
@@ -56,21 +58,16 @@
     self.view.backgroundColor = [UIColor whiteColor];
     scrollView = [[UIScrollView alloc] initWithFrame:self.view.bounds];
     [scrollView setContentSize:CGSizeMake(self.view.bounds.size.width, 600)];
-    [scrollView addTwitterCoverWithImage:[UIImage imageNamed:@"cover.png"]];
+    [scrollView addTwitterCoverWithImage:[UIImage imageNamed:@"cover.png"] withImageSize:imageSize];
     [self.view addSubview:scrollView];
     
     [scrollView addSubview:({
-        UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(20, CHTwitterCoverViewHeight, self.view.bounds.size.width - 40, 600 - CHTwitterCoverViewHeight)];
+        UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(20, imageSize.height, self.view.bounds.size.width - 40, 600 - imageSize.height)];
         label.numberOfLines = 0;
         label.font = [UIFont systemFontOfSize:22];
         label.text = @"TwitterCover is a parallax top view with real time blur effect to any UIScrollView, inspired by Twitter for iOS.\n\nCompletely created using UIKit framework.\n\nEasy to drop into your project.\n\nYou can add this feature to your own project, TwitterCover is easy-to-use.";
         label;
     })];
-}
-
-- (void)dealloc
-{
-    [scrollView removeTwitterCoverView];
 }
 
 

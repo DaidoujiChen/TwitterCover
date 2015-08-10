@@ -26,6 +26,7 @@
 #import "CHTwitterCoverDemoTableViewController.h"
 #import "UIScrollView+TwitterCover.h"
 
+#define imageSize CGSizeMake(CGRectGetWidth([UIScreen mainScreen].bounds), 200)
 
 @interface CHTwitterCoverDemoTableViewController ()
 
@@ -62,21 +63,15 @@
     return self;
 }
 
-
-- (void)dealloc
-{
-    [self.tableView removeTwitterCoverView];
-}
-
 - (void)viewDidLoad
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
-    [self.tableView addTwitterCoverWithImage:[UIImage imageNamed:@"cover.png"] withTopView:topView];
+    [self.tableView addTwitterCoverWithImage:[UIImage imageNamed:@"cover.png"] withImageSize:imageSize withTopView:topView];
     
     //This tableHeaderView plays the placeholder role here.
-    self.tableView.tableHeaderView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, CHTwitterCoverViewHeight + topView.bounds.size.height)];
+    self.tableView.tableHeaderView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, imageSize.height + topView.bounds.size.height)];
 }
 
 

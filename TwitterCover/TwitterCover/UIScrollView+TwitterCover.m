@@ -25,243 +25,127 @@
 
 #import "UIScrollView+TwitterCover.h"
 #import <objc/runtime.h>
-#import <QuartzCore/QuartzCore.h>
-#import <Accelerate/Accelerate.h>
 
+@interface CHTwitterCoverView : UIImageView
 
-static char UIScrollViewTwitterCover;
+@property (nonatomic, weak) UIScrollView *scrollView;
 
-@implementation UIScrollView (TwitterCover)
-
-- (void)setTwitterCoverView:(CHTwitterCoverView *)twitterCoverView {
-    [self willChangeValueForKey:@"twitterCoverView"];
-    objc_setAssociatedObject(self, &UIScrollViewTwitterCover,
-                             twitterCoverView,
-                             OBJC_ASSOCIATION_ASSIGN);
-    [self didChangeValueForKey:@"twitterCoverView"];
-}
-
-- (CHTwitterCoverView *)twitterCoverView {
-    return objc_getAssociatedObject(self, &UIScrollViewTwitterCover);
-}
-
-- (void)addTwitterCoverWithImage:(UIImage*)image
-{
-    [self addTwitterCoverWithImage:image withTopView:nil];
-}
-
-- (void)addTwitterCoverWithImage:(UIImage*)image withTopView:(UIView*)topView
-{
-    CHTwitterCoverView *view = [[CHTwitterCoverView alloc] initWithFrame:CGRectMake(0,0, 320, CHTwitterCoverViewHeight) andContentTopView:topView];
-    
-    view.backgroundColor = [UIColor clearColor];
-    view.image = image;
-    view.scrollView = self;
-    
-    [self addSubview:view];
-    if (topView) {
-        [self addSubview:topView];
-    }
-    self.twitterCoverView = view;
-}
-
-- (void)removeTwitterCoverView
-{
-    [self.twitterCoverView removeFromSuperview];
-    self.twitterCoverView = nil;
-}
+- (id)initWithFrame:(CGRect)frame andContentTopView:(UIView *)view;
 
 @end
 
+@interface CHTwitterCoverView ()
+
+@property (nonatomic, strong) UIView *topView;
+@property (nonatomic, readonly) CGFloat imageHeight;
+@property (nonatomic, readonly) CGFloat imageWidth;
+
+@end
 
 @implementation CHTwitterCoverView
-{
-    NSMutableArray *blurImages_;
-    UIView *topView;
+
+#pragma mark - readonly property
+
+- (CGFloat)imageHeight {
+    if (!objc_getAssociatedObject(self, _cmd)) {
+        objc_setAssociatedObject(self, _cmd, @(CGRectGetHeight(self.bounds)), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
+    NSNumber *imageHeight = objc_getAssociatedObject(self, _cmd);
+    return [imageHeight floatValue];
 }
 
-- (id)initWithFrame:(CGRect)frame
-{
-    return [self initWithFrame:frame andContentTopView:nil];
+- (CGFloat)imageWidth {
+    if (!objc_getAssociatedObject(self, _cmd)) {
+        objc_setAssociatedObject(self, _cmd, @(CGRectGetWidth(self.bounds)), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
+    NSNumber *imageWidth = objc_getAssociatedObject(self, _cmd);
+    return [imageWidth floatValue];
 }
 
-- (id)initWithFrame:(CGRect)frame andContentTopView:(UIView*)view
-{
+#pragma mark - method to override
+
+- (void)layoutSubviews {
+    [super layoutSubviews];
+    
+    if (self.scrollView.contentOffset.y < 0) {
+        CGFloat offset = -self.scrollView.contentOffset.y;
+        self.topView.frame = CGRectMake(0, -offset, self.imageWidth, self.topView.bounds.size.height);
+        self.frame = CGRectMake(-offset, -offset + self.topView.bounds.size.height, self.imageWidth + offset * 2, self.imageHeight + offset);
+    }
+    else {
+        self.topView.frame = CGRectMake(0, 0, self.imageWidth, self.topView.bounds.size.height);
+        self.frame = CGRectMake(0, self.topView.bounds.size.height, self.imageWidth, self.imageHeight);
+    }
+}
+
+#pragma mark - instance method
+
+- (id)initWithFrame:(CGRect)frame andContentTopView:(UIView *)view {
     self = [super initWithFrame:frame];
     if (self) {
         self.contentMode = UIViewContentModeScaleAspectFill;
         self.clipsToBounds = YES;
-        blurImages_ = [[NSMutableArray alloc] initWithCapacity:20];
-        topView = view;
+        self.topView = view;
     }
     return self;
 }
 
-- (void)setImage:(UIImage *)image
-{
-    [super setImage:image];
-    [blurImages_ removeAllObjects];
-    [self prepareForBlurImages];
-    
+@end
+
+@interface UIScrollView (PrivateTwitterCover)
+
+@property (nonatomic, strong) CHTwitterCoverView *twitterCoverView;
+
+@end
+
+@implementation UIScrollView (PrivateTwitterCover)
+
+#pragma mark - runtime objects
+
+- (void)setTwitterCoverView:(CHTwitterCoverView *)twitterCoverView {
+    objc_setAssociatedObject(self, @selector(twitterCoverView), twitterCoverView, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (void)prepareForBlurImages
-{
-    CGFloat factor = 0.1;
-    [blurImages_ addObject:self.image];
-    for (NSUInteger i = 0; i < 20; i++) {
-        [blurImages_ addObject:[self.image boxblurImageWithBlur:factor]];
-        factor+=0.04;
-    }
-}
-
-- (void)setScrollView:(UIScrollView *)scrollView
-{
-    
-    [_scrollView removeObserver:self forKeyPath:@"contentOffset"];
-    _scrollView = scrollView;
-    [_scrollView addObserver:self forKeyPath:@"contentOffset" options:NSKeyValueObservingOptionNew context:nil];
-}
-
-- (void)removeFromSuperview
-{
-    [_scrollView removeObserver:self forKeyPath:@"contentOffset"];
-    [topView removeFromSuperview];
-    [super removeFromSuperview];
-}
-
-- (void)layoutSubviews
-{
-    [super layoutSubviews];
-    if (self.scrollView.contentOffset.y < 0) {
-
-        CGFloat offset = -self.scrollView.contentOffset.y;
-        topView.frame = CGRectMake(0, -offset, 320, topView.bounds.size.height);
-
-        self.frame = CGRectMake(-offset,-offset + topView.bounds.size.height, 320+ offset * 2, CHTwitterCoverViewHeight + offset);
-        NSInteger index = offset / 10;
-        if (index < 0) {
-            index = 0;
-        }
-        else if(index >= blurImages_.count) {
-            index = blurImages_.count - 1;
-        }
-        UIImage *image = blurImages_[index];
-        if (self.image != image) {
-            [super setImage:image];
-        }
-        
-    }
-    else {
-        topView.frame = CGRectMake(0, 0, 320, topView.bounds.size.height);
-
-        self.frame = CGRectMake(0,topView.bounds.size.height, 320, CHTwitterCoverViewHeight);
-        UIImage *image = blurImages_[0];
-
-        if (self.image != image) {
-            [super setImage:image];
-        }
-    }
-}
-
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
-{
-    [self setNeedsLayout];
+- (CHTwitterCoverView *)twitterCoverView {
+    return objc_getAssociatedObject(self, _cmd);
 }
 
 @end
 
-@implementation UIImage (Blur)
+@implementation UIScrollView (TwitterCover)
 
--(UIImage *)boxblurImageWithBlur:(CGFloat)blur {
+#pragma mark - KVO
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    [self.twitterCoverView setNeedsLayout];
+}
+
+#pragma mark - instance methods
+
+- (void)addTwitterCoverWithImage:(UIImage *)image withImageSize:(CGSize)imageSize {
+    [self addTwitterCoverWithImage:image withImageSize:imageSize withTopView:nil];
+}
+
+- (void)addTwitterCoverWithImage:(UIImage *)image withImageSize:(CGSize)imageSize withTopView:(UIView *)topView {
+    CHTwitterCoverView *view = [[CHTwitterCoverView alloc] initWithFrame:CGRectMake(0, 0, imageSize.width, imageSize.height) andContentTopView:topView];
+    view.backgroundColor = [UIColor clearColor];
+    view.image = image;
+    view.scrollView = self;
+    [self addSubview:view];
     
-    NSData *imageData = UIImageJPEGRepresentation(self, 1); // convert to jpeg
-    UIImage* destImage = [UIImage imageWithData:imageData];
-    
-    
-    if (blur < 0.f || blur > 1.f) {
-        blur = 0.5f;
+    if (topView) {
+        [self addSubview:topView];
     }
-    int boxSize = (int)(blur * 40);
-    boxSize = boxSize - (boxSize % 2) + 1;
-    
-    CGImageRef img = destImage.CGImage;
-    
-    vImage_Buffer inBuffer, outBuffer;
-    
-    vImage_Error error;
-    
-    void *pixelBuffer;
-    
-    
-    //create vImage_Buffer with data from CGImageRef
-    
-    CGDataProviderRef inProvider = CGImageGetDataProvider(img);
-    CFDataRef inBitmapData = CGDataProviderCopyData(inProvider);
-    
-    
-    inBuffer.width = CGImageGetWidth(img);
-    inBuffer.height = CGImageGetHeight(img);
-    inBuffer.rowBytes = CGImageGetBytesPerRow(img);
-    
-    inBuffer.data = (void*)CFDataGetBytePtr(inBitmapData);
-    
-    //create vImage_Buffer for output
-    
-    pixelBuffer = malloc(CGImageGetBytesPerRow(img) * CGImageGetHeight(img));
-    
-    if(pixelBuffer == NULL)
-        NSLog(@"No pixelbuffer");
-    
-    outBuffer.data = pixelBuffer;
-    outBuffer.width = CGImageGetWidth(img);
-    outBuffer.height = CGImageGetHeight(img);
-    outBuffer.rowBytes = CGImageGetBytesPerRow(img);
-    
-    // Create a third buffer for intermediate processing
-    void *pixelBuffer2 = malloc(CGImageGetBytesPerRow(img) * CGImageGetHeight(img));
-    vImage_Buffer outBuffer2;
-    outBuffer2.data = pixelBuffer2;
-    outBuffer2.width = CGImageGetWidth(img);
-    outBuffer2.height = CGImageGetHeight(img);
-    outBuffer2.rowBytes = CGImageGetBytesPerRow(img);
-    
-    //perform convolution
-    error = vImageBoxConvolve_ARGB8888(&inBuffer, &outBuffer2, NULL, 0, 0, boxSize, boxSize, NULL, kvImageEdgeExtend);
-    if (error) {
-        NSLog(@"error from convolution %ld", error);
+    self.twitterCoverView = view;
+    [self addObserver:self forKeyPath:@"contentOffset" options:NSKeyValueObservingOptionNew context:nil];
+}
+
+#pragma mark - life cycle
+
+- (void)willMoveToSuperview:(UIView *)newSuperview {
+    if (self.twitterCoverView && !newSuperview) {
+        [self removeObserver:self forKeyPath:@"contentOffset"];
     }
-    error = vImageBoxConvolve_ARGB8888(&outBuffer2, &inBuffer, NULL, 0, 0, boxSize, boxSize, NULL, kvImageEdgeExtend);
-    if (error) {
-        NSLog(@"error from convolution %ld", error);
-    }
-    error = vImageBoxConvolve_ARGB8888(&inBuffer, &outBuffer, NULL, 0, 0, boxSize, boxSize, NULL, kvImageEdgeExtend);
-    if (error) {
-        NSLog(@"error from convolution %ld", error);
-    }
-    
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    CGContextRef ctx = CGBitmapContextCreate(outBuffer.data,
-                                             outBuffer.width,
-                                             outBuffer.height,
-                                             8,
-                                             outBuffer.rowBytes,
-                                             colorSpace,
-                                             (CGBitmapInfo)kCGImageAlphaNoneSkipLast);
-    CGImageRef imageRef = CGBitmapContextCreateImage (ctx);
-    UIImage *returnImage = [UIImage imageWithCGImage:imageRef];
-    
-    //clean up
-    CGContextRelease(ctx);
-    CGColorSpaceRelease(colorSpace);
-    
-    free(pixelBuffer);
-    free(pixelBuffer2);
-    CFRelease(inBitmapData);
-    
-    CGImageRelease(imageRef);
-    
-    return returnImage;
 }
 
 @end
