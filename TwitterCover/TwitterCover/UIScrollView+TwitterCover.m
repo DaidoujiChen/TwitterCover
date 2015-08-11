@@ -69,12 +69,16 @@
     
     if (self.scrollView.contentOffset.y < -self.scrollView.contentInset.top) {
         CGFloat offset = -self.scrollView.contentOffset.y - self.scrollView.contentInset.top;
-        self.topView.frame = CGRectMake(0, -offset, self.imageWidth, self.topView.bounds.size.height);
-        self.frame = CGRectMake(-offset, -offset + self.topView.bounds.size.height, self.imageWidth + offset * 2, self.imageHeight + offset);
+        self.topView.frame = CGRectMake(0, -offset, self.imageWidth, CGRectGetHeight(self.topView.bounds));
+        self.frame = CGRectMake(-offset, -offset + CGRectGetHeight(self.topView.bounds), self.imageWidth + offset * 2, self.imageHeight + offset);
     }
     else {
-        self.topView.frame = CGRectMake(0, 0, self.imageWidth, self.topView.bounds.size.height);
-        self.frame = CGRectMake(0, self.topView.bounds.size.height, self.imageWidth, self.imageHeight);
+        CGFloat offset = self.scrollView.contentOffset.y;
+        if (offset >= CGRectGetHeight(self.topView.bounds)) {
+            offset -= CGRectGetHeight(self.topView.bounds);
+            self.topView.frame = CGRectMake(0, 0, self.imageWidth, CGRectGetHeight(self.topView.bounds));
+            self.frame = CGRectMake(0, CGRectGetHeight(self.topView.bounds) + offset, self.imageWidth, self.imageHeight - offset);
+        }
     }
 }
 
@@ -131,7 +135,7 @@
         [self.twitterCoverView removeFromSuperview];
         [self removeObserver:self forKeyPath:@"contentOffset"];
     }
-    CHTwitterCoverView *view = [[CHTwitterCoverView alloc] initWithFrame:CGRectMake(0, 0, imageSize.width, imageSize.height) andContentTopView:topView];
+    CHTwitterCoverView *view = [[CHTwitterCoverView alloc] initWithFrame:CGRectMake(0, CGRectGetHeight(topView.bounds), imageSize.width, imageSize.height) andContentTopView:topView];
     view.backgroundColor = [UIColor clearColor];
     view.image = image;
     view.scrollView = self;
