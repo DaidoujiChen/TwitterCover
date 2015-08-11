@@ -6,9 +6,15 @@ Completely created using UIKit framework.
 
 Easy to drop into your project.
 
-You can add this feature to your own project, `TwitterCover` is easy-to-use. 
+## Modify by DaidoujiChen ##
+針對自己使用上的需求, 修改了幾個部分, 首先, 把 code 的封裝與架構做了一些調整, 目前只剩下
 
-**Now the Android version is also available:** [TwitterCover-Android](https://github.com/cyndibaby905/TwitterCover-Android)
+`````
+- (void)addTwitterCoverWithImage:(UIImage *)image withImageSize:(CGSize)imageSize;
+- (void)addTwitterCoverWithImage:(UIImage *)image withImageSize:(CGSize)imageSize withTopView:(UIView *)topView;
+`````
+
+兩個 `public method` 可以 call, 也不再需要 call remove 把 view 移除, 並且可由外部控制圖片的大小, 而不是吃寫死的 `#define` 值. 第二, 拿掉了下拉時候會帶模糊的效果. 第三, 新增了上滑的時候, 圖片不是被整個直接推上去, 看起來是被關起來的效果.
 
 ## Requirements ##
 
@@ -24,15 +30,11 @@ No other frameworks required.
     #import "UIScrollView+TwitterCover.h"
 
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:self.view.bounds];
-    [scrollView addTwitterCoverWithImage:[UIImage imageNamed:@"cover.png"]];
-
-And do not forget to remove it in your dealloc method, otherwise memory leaks:
-
-    [scrollView removeTwitterCoverView];    
+    [scrollView addTwitterCoverWithImage:[UIImage imageNamed:@"cover.png"]];  
 
 ## How it looks ##
 
-![TwitterCover] (https://raw.github.com/cyndibaby905/TwitterCover/master/TwitterCover.gif)
+![TwitterCover] (https://raw.githubusercontent.com/DaidoujiChen/TwitterCover/master/TwitterCover.gif)
 
 
 ## Lincense ##
