@@ -114,6 +114,14 @@
     return objc_getAssociatedObject(self, _cmd);
 }
 
+- (void)setTapped:(void (^)(void))tapped {
+    objc_setAssociatedObject(self, @selector(tapped), tapped, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (void (^)(void))tapped {
+    return objc_getAssociatedObject(self, _cmd);
+}
+
 @end
 
 @implementation UIScrollView (TwitterCover)
@@ -124,18 +132,30 @@
     [self.twitterCoverView setNeedsLayout];
 }
 
-#pragma mark - instance methods
+#pragma mark - private instance methods
 
-- (void)addTwitterCoverWithImage:(UIImage *)image withImageSize:(CGSize)imageSize {
-    [self addTwitterCoverWithImage:image withImageSize:imageSize withTopView:nil];
+- (void)onTwitterCoverTapped:(UITapGestureRecognizer *)tapGestureRecognizer {
+    void (^tapped)(void) = [self tapped];
+    if (tapped) {
+        tapped();
+    }
 }
 
-- (void)addTwitterCoverWithImage:(UIImage *)image withImageSize:(CGSize)imageSize withTopView:(UIView *)topView {
+#pragma mark - instance methods
+
+- (void)addTwitterCoverWithImage:(UIImage *)image withImageSize:(CGSize)imageSize onTapped:(void (^)(void))tapped {
+    [self addTwitterCoverWithImage:image withImageSize:imageSize withTopView:nil onTapped:tapped];
+}
+
+- (void)addTwitterCoverWithImage:(UIImage *)image withImageSize:(CGSize)imageSize withTopView:(UIView *)topView onTapped:(void (^)(void))tapped {
     if (self.twitterCoverView) {
         [self.twitterCoverView removeFromSuperview];
         [self removeObserver:self forKeyPath:@"contentOffset"];
     }
+    [self setTapped:tapped];
+    
     CHTwitterCoverView *view = [[CHTwitterCoverView alloc] initWithFrame:CGRectMake(0, CGRectGetHeight(topView.bounds), imageSize.width, imageSize.height) andContentTopView:topView];
+    view.userInteractionEnabled = YES;
     view.backgroundColor = [UIColor clearColor];
     view.image = image;
     view.scrollView = self;
@@ -144,7 +164,13 @@
     if (topView) {
         [self addSubview:topView];
     }
+    
+    // 加上點擊手勢
+    UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(onTwitterCoverTapped:)];
+    [view addGestureRecognizer:tapGestureRecognizer];
     self.twitterCoverView = view;
+    
+    // KVO
     [self addObserver:self forKeyPath:@"contentOffset" options:NSKeyValueObservingOptionNew context:nil];
 }
 

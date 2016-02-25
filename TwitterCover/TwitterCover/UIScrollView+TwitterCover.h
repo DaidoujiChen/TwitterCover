@@ -27,7 +27,7 @@
 
 @interface UIScrollView (TwitterCover)
 
-- (void)addTwitterCoverWithImage:(UIImage *)image withImageSize:(CGSize)imageSize;
-- (void)addTwitterCoverWithImage:(UIImage *)image withImageSize:(CGSize)imageSize withTopView:(UIView *)topView;
+- (void)addTwitterCoverWithImage:(UIImage *)image withImageSize:(CGSize)imageSize onTapped:(void (^)(void))tapped;
+- (void)addTwitterCoverWithImage:(UIImage *)image withImageSize:(CGSize)imageSize withTopView:(UIView *)topView onTapped:(void (^)(void))tapped;
 
 @end
