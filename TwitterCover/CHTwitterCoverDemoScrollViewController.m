@@ -58,10 +58,34 @@
     self.view.backgroundColor = [UIColor whiteColor];
     scrollView = [[UIScrollView alloc] initWithFrame:self.view.bounds];
     [scrollView setContentSize:CGSizeMake(self.view.bounds.size.width, 600)];
-    [scrollView addTwitterCoverWithImage:[UIImage imageNamed:@"cover.png"] withImageSize:imageSize onTapped: ^{
-        NSLog(@"Tapped");
+    [scrollView addTwitterCoverWithImages:@[[UIImage imageNamed:@"cover.png"], [UIImage imageNamed:@"cover.png"], [UIImage imageNamed:@"cover.png"]] withImageSize:imageSize onTapped: ^(NSInteger index) {
+        NSLog(@"Tapped at Index %td", index);
     }];
     [self.view addSubview:scrollView];
+    
+    // simulate async replace image1
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        
+        NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:@"http://c1.cdn.goumin.com/cms/petschool/day_151023/20151023_a5c159b.jpg"]];
+        UIImage *image = [UIImage imageWithData:imageData];
+        
+        [NSThread sleepForTimeInterval:5.0f];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [scrollView updateTwitterCoverWithImage:image atIndex:1];
+        });
+    });
+    
+    // simulate async replace image2
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        
+        NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:@"https://www.petfinder.com/wp-content/uploads/2012/11/140272627-grooming-needs-senior-cat-632x475.jpg"]];
+        UIImage *image = [UIImage imageWithData:imageData];
+        
+        [NSThread sleepForTimeInterval:10.0f];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [scrollView updateTwitterCoverWithImage:image atIndex:2];
+        });
+    });
     
     [scrollView addSubview:({
         UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(20, imageSize.height, self.view.bounds.size.width - 40, 600 - imageSize.height)];

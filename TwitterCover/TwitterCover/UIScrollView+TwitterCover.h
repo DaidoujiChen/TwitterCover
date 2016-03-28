@@ -29,5 +29,8 @@
 
 - (void)addTwitterCoverWithImage:(UIImage *)image withImageSize:(CGSize)imageSize onTapped:(void (^)(void))tapped;
 - (void)addTwitterCoverWithImage:(UIImage *)image withImageSize:(CGSize)imageSize withTopView:(UIView *)topView onTapped:(void (^)(void))tapped;
+- (void)addTwitterCoverWithImages:(NSArray<UIImage *> *)images withImageSize:(CGSize)imageSize onTapped:(void (^)(NSInteger index))tapped;
+- (void)addTwitterCoverWithImages:(NSArray<UIImage *> *)images withImageSize:(CGSize)imageSize withTopView:(UIView *)topView onTapped:(void (^)(NSInteger index))tapped;
+- (void)updateTwitterCoverWithImage:(UIImage *)image atIndex:(NSInteger)index;
 
 @end
