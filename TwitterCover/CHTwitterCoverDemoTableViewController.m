@@ -94,7 +94,7 @@
     }
     
     
-    cell.textLabel.text = [NSString stringWithFormat:@"Cell %d",indexPath.row + 1];
+    cell.textLabel.text = [NSString stringWithFormat:@"Cell %td",indexPath.row + 1];
     
     return cell;
 }
