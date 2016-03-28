@@ -58,7 +58,9 @@
     self.view.backgroundColor = [UIColor whiteColor];
     scrollView = [[UIScrollView alloc] initWithFrame:self.view.bounds];
     [scrollView setContentSize:CGSizeMake(self.view.bounds.size.width, 600)];
-    [scrollView addTwitterCoverWithImage:[UIImage imageNamed:@"cover.png"] withImageSize:imageSize];
+    [scrollView addTwitterCoverWithImage:[UIImage imageNamed:@"cover.png"] withImageSize:imageSize onTapped: ^{
+        NSLog(@"Tapped");
+    }];
     [self.view addSubview:scrollView];
     
     [scrollView addSubview:({

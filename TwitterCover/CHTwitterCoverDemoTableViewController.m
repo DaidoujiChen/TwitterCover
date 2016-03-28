@@ -68,10 +68,13 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
-    [self.tableView addTwitterCoverWithImage:[UIImage imageNamed:@"cover.png"] withImageSize:imageSize withTopView:topView];
+    [self.tableView addTwitterCoverWithImage:[UIImage imageNamed:@"cover.png"] withImageSize:imageSize withTopView:topView onTapped: ^{
+        NSLog(@"Tapped");
+    }];
     
     //This tableHeaderView plays the placeholder role here.
     self.tableView.tableHeaderView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, imageSize.height + topView.bounds.size.height)];
+    self.tableView.tableHeaderView.userInteractionEnabled = NO;
 }
 
 
