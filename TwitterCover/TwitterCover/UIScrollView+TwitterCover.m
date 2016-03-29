@@ -173,6 +173,7 @@
         // 如果圖片多餘一張, 放置 pageControl
         if (images.count > 1) {
             self.pageControl = [[UIPageControl alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.internalScrollView.frame) - 20.0f, self.imageWidth, 20.0f)];
+            self.pageControl.userInteractionEnabled = NO;
             self.pageControl.numberOfPages = images.count;
             self.pageControl.currentPage = 0;
             self.pageControl.backgroundColor = [UIColor clearColor];
