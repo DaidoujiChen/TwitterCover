@@ -10,11 +10,14 @@ Easy to drop into your project.
 針對自己使用上的需求, 修改了幾個部分, 首先, 把 code 的封裝與架構做了一些調整, 目前只剩下
 
 `````
-- (void)addTwitterCoverWithImage:(UIImage *)image withImageSize:(CGSize)imageSize;
-- (void)addTwitterCoverWithImage:(UIImage *)image withImageSize:(CGSize)imageSize withTopView:(UIView *)topView;
+- (void)addTwitterCoverWithImage:(UIImage *)image withImageSize:(CGSize)imageSize onTapped:(void (^)(void))tapped;
+- (void)addTwitterCoverWithImage:(UIImage *)image withImageSize:(CGSize)imageSize withTopView:(UIView *)topView onTapped:(void (^)(void))tapped;
+- (void)addTwitterCoverWithImages:(NSArray<UIImage *> *)images withImageSize:(CGSize)imageSize onTapped:(void (^)(NSInteger index))tapped;
+- (void)addTwitterCoverWithImages:(NSArray<UIImage *> *)images withImageSize:(CGSize)imageSize withTopView:(UIView *)topView onTapped:(void (^)(NSInteger index))tapped;
+- (void)updateTwitterCoverWithImage:(UIImage *)image atIndex:(NSInteger)index;
 `````
 
-兩個 `public method` 可以 call, 也不再需要 call remove 把 view 移除, 並且可由外部控制圖片的大小, 而不是吃寫死的 `#define` 值. 第二, 拿掉了下拉時候會帶模糊的效果. 第三, 新增了上滑的時候, 圖片不是被整個直接推上去, 看起來是被關起來的效果.
+新增五個 `Instance Method` 可以調用, 放置單張或是多張的圖片.
 
 ## Requirements ##
 
