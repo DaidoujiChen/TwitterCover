@@ -248,7 +248,9 @@
 
 - (void)addTwitterCoverWithImage:(UIImage *)image withImageSize:(CGSize)imageSize withTopView:(UIView *)topView onTapped:(void (^)(void))tapped {
     [self addTwitterCoverWithImages:@[image] withImageSize:imageSize withTopView:topView onTapped: ^(NSInteger index) {
-        tapped();
+        if (tapped) {
+            tapped();
+        }
     }];
 }
 
